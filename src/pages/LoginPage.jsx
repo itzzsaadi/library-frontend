@@ -3,6 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { login as loginService } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
 import { Navigate } from 'react-router-dom'
+import { useGoogleLogin } from '@react-oauth/google'
+import { googleLogin } from '../services/authService'
+import { GoogleLogin } from '@react-oauth/google'
 
 
 function LoginPage() {
@@ -16,6 +19,23 @@ function LoginPage() {
     const navigate = useNavigate()
     const location = useLocation()
     const successMessage = location.state?.message || null
+
+    const handleGoogleLogin = async (credentialResponse) => {
+        try {
+            // credentialResponse.credential = IdToken ✅
+            const data = await googleLogin(credentialResponse.credential)
+            login(data)
+            navigate('/')
+        } catch (err) {
+            setError('Google login failed. Please try again.')
+        }
+    }
+
+    const googleLoginHook = useGoogleLogin({
+        onSuccess: handleGoogleLogin,
+        onError: () => setError('Google login failed'),
+        flow: 'auth-code'
+    })
 
     const [formData, setFormData] = useState({
         email: '',
@@ -121,10 +141,15 @@ function LoginPage() {
                 </div>
 
                 {/* Google Login */}
-                <button className="w-full flex items-center justify-center gap-3 border border-gray-300 py-3 rounded-xl hover:bg-gray-50 transition text-sm font-medium text-gray-700">
-                    <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
-                    Continue with Google
-                </button>
+                <div className="flex justify-center">
+                    <GoogleLogin
+                        onSuccess={handleGoogleLogin}
+                        onError={() => setError('Google login failed')}
+                        width="368"
+                        text="continue_with"
+                        shape="rectangular"
+                    />
+                </div>
 
                 <p className="text-center text-sm text-gray-500 mt-4">
                     Don't have an account?{' '}
