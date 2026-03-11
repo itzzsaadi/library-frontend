@@ -1,8 +1,18 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { login } from '../services/authService'
+import { login as loginService } from '../services/authService'
+import { useAuth } from '../context/AuthContext'
+import { Navigate } from 'react-router-dom'
+
 
 function LoginPage() {
+    const { isLoggedIn } = useAuth()
+    // Already logged in → ghar bhejo
+    if (isLoggedIn) {
+        return <Navigate to="/" replace />
+    }
+    // Component andar:
+    const { login } = useAuth()
     const navigate = useNavigate()
     const location = useLocation()
     const successMessage = location.state?.message || null
@@ -25,13 +35,10 @@ function LoginPage() {
 
         try {
             setLoading(true)
-            const data = await login(formData)
-
-            // Token save karo
-            localStorage.setItem('accessToken', data.accessToken)
-            localStorage.setItem('refreshToken', data.refreshToken)
-            localStorage.setItem('user', JSON.stringify(data.user))
-
+            // Token save karo, context handle karega
+            const data = await loginService(formData)
+            // Context update hoga automatically (persistence included)
+            login(data)
             navigate('/')
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed')

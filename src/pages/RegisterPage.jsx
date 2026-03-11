@@ -1,8 +1,16 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { register } from '../services/authService'
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+
 
 function RegisterPage() {
+    const { isLoggedIn } = useAuth()
+    // Already logged in → ghar bhejo
+    if (isLoggedIn) {
+        return <Navigate to="/" replace />
+    }
     const navigate = useNavigate()
 
     const [formData, setFormData] = useState({

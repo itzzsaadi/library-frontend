@@ -4,9 +4,13 @@ import BookCard from '../components/BookCard'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getBooks } from '../services/bookService'
+import { useAuth } from '../context/AuthContext'
 
 // Main App Component
 function HomePage() {
+
+    // Auth Context se user info aur logout function le lo
+    const { user, isLoggedIn, logout } = useAuth()
     // State to manage the list of books
     const [books, setBooks] = useState([])
     const [loading, setLoading] = useState(true)
@@ -46,14 +50,27 @@ function HomePage() {
             <nav className="bg-white shadow-sm border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold text-indigo-600">📚 LibraryApp</h1>
-                    <div className="flex gap-3">
-                        <Link to="/login" className="text-sm text-gray-600 hover:text-indigo-600 transition">
-                            Login
-                        </Link>
-                        <Link to="/register" className="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
-                            Register
-                        </Link>
-                    </div>
+                    {/* Conditionally render Login/Register or User Profile */}
+                    {isLoggedIn ? (
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-600">👋 {user?.fullName}</span>
+                            <button
+                                onClick={logout}
+                                className="text-sm bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex gap-1">
+                            <Link to="/login" className="text-sm text-gray-600 px-4 py-2 hover:text-indigo-600 transition">
+                                Login
+                            </Link>
+                            <Link to="/register" className="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                                Register
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </nav>
 
