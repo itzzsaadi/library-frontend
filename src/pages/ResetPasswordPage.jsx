@@ -8,7 +8,10 @@ function ResetPasswordPage() {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const email = searchParams.get('email') || ''
-    
+        // Email query param nahi → forgot-password pe wapis bhejo
+    if (!email) {
+        return <Navigate to="/forgot-password" replace />
+    }
 
     const [otp, setOtp] = useState(new Array(6).fill(""))
     const inputRefs = useRef([])
