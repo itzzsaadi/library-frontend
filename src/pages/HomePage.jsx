@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getBooks } from '../services/bookService'
 import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 // Main App Component
 function HomePage() {
@@ -16,7 +17,7 @@ function HomePage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [search, setSearch] = useState('')
-
+    const navigate = useNavigate()
     // Debounce — search change hone ke 500ms baad API call
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -53,7 +54,11 @@ function HomePage() {
                     {/* Conditionally render Login/Register or User Profile */}
                     {isLoggedIn ? (
                         <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-600">👋 {user?.fullName}</span>
+                            <span
+                                onClick={() => navigate('/profile')}
+                                className="text-sm text-gray-600 hover:text-indigo-600 cursor-pointer transition"
+                            >
+                                {user?.fullName.split(' ')[0]}!</span>
                             <button
                                 onClick={logout}
                                 className="text-sm bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"

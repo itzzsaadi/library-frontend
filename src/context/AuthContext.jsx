@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
 // 1. Context banao
 const AuthContext = createContext()
@@ -20,8 +20,10 @@ export function AuthProvider({ children }) {
         localStorage.setItem('accessToken', data.accessToken)
         localStorage.setItem('refreshToken', data.refreshToken)
         localStorage.setItem('user', JSON.stringify(data.user))
+        localStorage.setItem('isGoogleUser', data.isGoogleUser ? 'true' : 'false')
         setUser(data.user)
         setAccessToken(data.accessToken)
+        setIsGoogleUser(data.isGoogleUser ? true : false)
     }
 
     // Logout function
@@ -29,9 +31,21 @@ export function AuthProvider({ children }) {
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('user')
+        localStorage.removeItem('isGoogleUser')
         setUser(null)
         setAccessToken(null)
+        setIsGoogleUser(false)
     }
+
+    useEffect(() => {
+        window.addEventListener('auth:logout', logout)
+        return () => window.removeEventListener('auth:logout', logout) // cleanup
+    }, [])
+
+    // State mein add karo
+    const [isGoogleUser, setIsGoogleUser] = useState(() => {
+        return localStorage.getItem('isGoogleUser') === 'true'
+    })
 
     const isAdmin = user?.roles?.includes('Admin')
     const isLoggedIn = !!user
@@ -43,7 +57,8 @@ export function AuthProvider({ children }) {
             login,
             logout,
             isAdmin,
-            isLoggedIn
+            isLoggedIn,
+            isGoogleUser
         }}>
             {children}
         </AuthContext.Provider>
