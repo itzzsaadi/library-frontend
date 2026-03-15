@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
 // 1. Context banao
 const AuthContext = createContext()
@@ -36,6 +36,11 @@ export function AuthProvider({ children }) {
         setAccessToken(null)
         setIsGoogleUser(false)
     }
+
+    useEffect(() => {
+        window.addEventListener('auth:logout', logout)
+        return () => window.removeEventListener('auth:logout', logout) // cleanup
+    }, [])
 
     // State mein add karo
     const [isGoogleUser, setIsGoogleUser] = useState(() => {

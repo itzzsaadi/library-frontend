@@ -1,29 +1,20 @@
-import axios from 'axios'
-import config from '../config'
+import axiosInstance from './axiosInstance'
 
-export const getProfile = async (token) => {
-    const response = await axios.get(`${config.API_URL}/Member/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-    })
+// Token manually pass karne ki zaroorat NAHI ab!
+
+export const getProfile = async () => {
+    const response = await axiosInstance.get('/Member/profile')
     return response.data
 }
 
-export const updateProfile = async (token, data) => {
-    const response = await axios.put(`${config.API_URL}/Member/profile`, data, {
-        headers: { Authorization: `Bearer ${token}` }
-    })
+export const updateProfile = async (formData) => {
+    const response = await axiosInstance.put('/Member/profile', formData)
     return response.data
 }
-//Profile Photo Update Funtion
-export const updateProfilePhoto = async (token, photoFile) => {
+
+export const updateProfilePhoto = async (photoFile) => {
     const formData = new FormData()
     formData.append('photo', photoFile)
-
-    const response = await axios.put(`${config.API_URL}/member/profile/photo`, formData, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-        }
-    })
+    const response = await axiosInstance.put('/Member/profile/photo', formData)
     return response.data
 }

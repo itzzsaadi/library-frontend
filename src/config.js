@@ -4,3 +4,4 @@ const config = {
 }
 
 export default config
+export const API_URL = "http://localhost:5115/api";

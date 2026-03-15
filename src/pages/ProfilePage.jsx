@@ -5,7 +5,7 @@ import { getProfile, updateProfile, updateProfilePhoto } from '../services/membe
 
 
 function ProfilePage() {
-    const { accessToken, isLoggedIn, isGoogleUser } = useAuth()
+    const { isLoggedIn, isGoogleUser } = useAuth()
     const navigate = useNavigate()
 
 
@@ -16,7 +16,7 @@ function ProfilePage() {
     const [editMode, setEditMode] = useState(false)
     const [formData, setFormData] = useState({ fullName: '', phone: '' })
     const [updateLoading, setUpdateLoading] = useState(false)
-    const [successMessage, setSuccessMessage] = useState(null)
+    const [successMessage, setSuccessMessage] = useState(null)   
 
     // Auth check
     useEffect(() => {
@@ -31,7 +31,7 @@ function ProfilePage() {
     const fetchProfile = async () => {
         try {
             setLoading(true)
-            const data = await getProfile(accessToken)
+            const data = await getProfile()
             setProfile(data)
             setFormData({ fullName: data.fullName, phone: data.phone || '' })
         } catch (err) {
@@ -48,7 +48,7 @@ function ProfilePage() {
 
         try {
             setUpdateLoading(true)
-            await updateProfile(accessToken, formData)
+            await updateProfile(formData)
             setSuccessMessage('Profile updated successfully!')
             setEditMode(false)
             fetchProfile() // Refresh
@@ -65,7 +65,7 @@ function ProfilePage() {
 
         try {
             setPhotoLoading(true)
-            await updateProfilePhoto(accessToken, file)
+            await updateProfilePhoto(file)
             await fetchProfile() // Profile refresh karo
             setSuccessMessage('Photo update ho gayi! 🎉')
         } catch (err) {
