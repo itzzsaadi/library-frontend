@@ -10,7 +10,10 @@ function VerifyOtpPage() {
     const email = location.state?.email || ''
     // Email nahi aaya → register pe wapis bhejo
     if (!email) {
-        return <Navigate to="/register" replace />
+        return <Navigate to="/register"
+            state={{ message: "Please Register first!" }}
+            replace
+        />
     }
 
     // 6 khali dabbay (boxes) ka array

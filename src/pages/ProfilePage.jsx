@@ -1,14 +1,18 @@
+// src/pages/ProfilePage.jsx
+// Protected page — sirf logged in users ke liye
+// Navbar App.jsx se aa raha hai — yahan nahi hoga
+// PrivateRoute already guard kar raha hai — useEffect auth check zaroorat nahi
+
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getProfile, updateProfile, updateProfilePhoto } from '../services/memberService'
 
-
 function ProfilePage() {
-    const { isLoggedIn, isGoogleUser } = useAuth()
+    const { isGoogleUser } = useAuth()  // isLoggedIn aur navigate hata diye — PrivateRoute handle kar raha hai
     const navigate = useNavigate()
 
-
+    // ─── State ───────────────────────────────────────────
     const [profile, setProfile] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -16,18 +20,14 @@ function ProfilePage() {
     const [editMode, setEditMode] = useState(false)
     const [formData, setFormData] = useState({ fullName: '', phone: '' })
     const [updateLoading, setUpdateLoading] = useState(false)
-    const [successMessage, setSuccessMessage] = useState(null)   
+    const [successMessage, setSuccessMessage] = useState(null)
 
-    // Auth check
+    // ─── Profile Fetch on Mount ───────────────────────────
     useEffect(() => {
-        if (!isLoggedIn) navigate('/login')
-    }, [isLoggedIn])
-
-    // Profile fetch
-    useEffect(() => {
-        if (isLoggedIn) fetchProfile()
+        fetchProfile()
     }, [])
 
+    // ─── Fetch Profile ────────────────────────────────────
     const fetchProfile = async () => {
         try {
             setLoading(true)
@@ -41,6 +41,7 @@ function ProfilePage() {
         }
     }
 
+    // ─── Update Profile (Name + Phone) ───────────────────
     const handleUpdate = async (e) => {
         e.preventDefault()
         setSuccessMessage(null)
@@ -51,14 +52,15 @@ function ProfilePage() {
             await updateProfile(formData)
             setSuccessMessage('Profile updated successfully!')
             setEditMode(false)
-            fetchProfile() // Refresh
+            fetchProfile() // Latest data dobara fetch karo
         } catch (err) {
             setError(err.response?.data?.message || 'Update failed')
         } finally {
             setUpdateLoading(false)
         }
     }
-    //Photo Update Handler
+
+    // ─── Photo Upload Handler ─────────────────────────────
     const handlePhotoChange = async (e) => {
         const file = e.target.files[0]
         if (!file) return
@@ -66,7 +68,7 @@ function ProfilePage() {
         try {
             setPhotoLoading(true)
             await updateProfilePhoto(file)
-            await fetchProfile() // Profile refresh karo
+            await fetchProfile() // Photo update ke baad profile refresh
             setSuccessMessage('Photo update ho gayi! 🎉')
         } catch (err) {
             setError(err.response?.data?.message || 'Photo upload failed')
@@ -74,94 +76,77 @@ function ProfilePage() {
             setPhotoLoading(false)
         }
     }
+
+    // ─── Loading State ────────────────────────────────────
     if (loading) return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
             <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
     )
 
+    // ─── Render ───────────────────────────────────────────
     return (
         <div className="min-h-screen bg-gray-50">
 
-            {/* Navbar */}
-            <nav className="bg-white shadow-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-                    <h1
-                        onClick={() => navigate('/')}
-                        className="text-2xl font-bold text-indigo-600 cursor-pointer"
-                    >
-                        📚 LibraryApp
-                    </h1>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="text-sm text-gray-600 hover:text-indigo-600 transition"
-                    >
-                        ← Back to Home
-                    </button>
-                </div>
-            </nav>
-
             <main className="max-w-2xl mx-auto px-6 py-10">
 
-                {/* Header */}
+                {/* Profile Photo Section */}
                 <div className="text-center mb-8">
-                    <div className="relative w-24 h-24 mx-auto mb-4">
-                        <div className="relative group w-28 h-28">
-                            {/* Photo ya Emoji Container */}
-                            <div className="w-full h-full rounded-full overflow-hidden border-4 border-indigo-100 shadow-sm transition-all duration-300 group-hover:border-indigo-300">
-                                {profile?.profilePhotoPath ? (
-                                    <img
-                                        src={`${import.meta.env.VITE_API_BASE}/${profile.profilePhotoPath}`}
-                                        alt="Profile"
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full bg-indigo-50 flex items-center justify-center transition-colors duration-300 group-hover:bg-indigo-100">
-                                        <span className="text-6xl transition-transform duration-300 group-hover:scale-110">👤</span>
-                                    </div>
-                                )}
+                    <div className="relative group w-28 h-28 mx-auto mb-4">
 
-                                {/* Hover Overlay - Yeh asli professional touch hai */}
-                                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full">
-                                </div>
-                            </div>
-
-                            {/* Camera button - Integrated with Group Hover */}
-                            <label className="absolute bottom-1 right-1 bg-indigo-600 text-white w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-lg transform transition-all duration-300 hover:scale-110 active:scale-95 group-hover:bg-indigo-700 ring-2 ring-white">
-                                {photoLoading ? (
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                ) : (
-                                    <span className="text-lg">📷</span>
-                                )}
-                                <input
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    onChange={handlePhotoChange}
-                                    className="hidden"
+                        {/* Photo ya Placeholder */}
+                        <div className="w-full h-full rounded-full overflow-hidden border-4 border-indigo-100 shadow-sm transition-all duration-300 group-hover:border-indigo-300">
+                            {profile?.profilePhotoPath ? (
+                                <img
+                                    src={`${import.meta.env.VITE_API_BASE}/${profile.profilePhotoPath}`}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
-                            </label>
+                            ) : (
+                                <div className="w-full h-full bg-indigo-50 flex items-center justify-center transition-colors duration-300 group-hover:bg-indigo-100">
+                                    <span className="text-6xl transition-transform duration-300 group-hover:scale-110">👤</span>
+                                </div>
+                            )}
+
+                            {/* Hover Overlay */}
+                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
                         </div>
+
+                        {/* Camera Button — Photo Upload Trigger */}
+                        <label className="absolute bottom-1 right-1 bg-indigo-600 text-white w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-lg transform transition-all duration-300 hover:scale-110 active:scale-95 group-hover:bg-indigo-700 ring-2 ring-white">
+                            {photoLoading ? (
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                                <span className="text-lg">📷</span>
+                            )}
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={handlePhotoChange}
+                                className="hidden"
+                            />
+                        </label>
                     </div>
 
                     <h2 className="text-2xl font-bold text-gray-800">{profile?.fullName}</h2>
                     <p className="text-gray-500 text-sm mt-1">{profile?.email}</p>
                 </div>
 
-                {/* Success */}
+                {/* Success Message */}
                 {successMessage && (
                     <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm">
-                        {successMessage}
+                        ✅ {successMessage}
                     </div>
                 )}
 
-                {/* Error */}
+                {/* Error Message */}
                 {error && (
                     <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
-                        {error}
+                        ❌ {error}
                     </div>
                 )}
 
-                {/* Profile Card */}
+                {/* Personal Info Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold text-gray-800">Personal Info</h3>
@@ -175,6 +160,7 @@ function ProfilePage() {
                         )}
                     </div>
 
+                    {/* Edit Form ya View Mode */}
                     {editMode ? (
                         <form onSubmit={handleUpdate} className="space-y-4">
                             <div>
@@ -214,6 +200,7 @@ function ProfilePage() {
                             </div>
                         </form>
                     ) : (
+                        // View Mode — Profile Info
                         <div className="space-y-3">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-500">Full Name</span>
@@ -243,19 +230,21 @@ function ProfilePage() {
                     <div className="space-y-3">
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Type</span>
-                            <span className={`font-semibold px-2 py-1 rounded-full text-xs ${profile?.membershipType === 1
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-blue-100 text-blue-700'
-                                }`}>
+                            <span className={`font-semibold px-2 py-1 rounded-full text-xs ${
+                                profile?.membershipType === 1
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : 'bg-blue-100 text-blue-700'
+                            }`}>
                                 {profile?.membershipType === 1 ? '⭐ Premium' : '📘 Basic'}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Status</span>
-                            <span className={`font-semibold px-2 py-1 rounded-full text-xs ${profile?.status === 0
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'
-                                }`}>
+                            <span className={`font-semibold px-2 py-1 rounded-full text-xs ${
+                                profile?.status === 0
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-red-100 text-red-700'
+                            }`}>
                                 {profile?.status === 0 ? '✅ Active' : '🚫 Suspended'}
                             </span>
                         </div>
@@ -273,6 +262,8 @@ function ProfilePage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Change Password ya Google User Message */}
                 {isGoogleUser ? (
                     <div className="mt-4 px-4 py-3 bg-gray-50 rounded-lg text-center">
                         <p className="text-xs text-gray-500">🔗 Authenticated with <b>Google</b></p>
@@ -286,6 +277,7 @@ function ProfilePage() {
                         🔒 Change Password
                     </button>
                 )}
+
             </main>
         </div>
     )

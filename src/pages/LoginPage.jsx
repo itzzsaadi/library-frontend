@@ -19,6 +19,7 @@ function LoginPage() {
     const navigate = useNavigate()
     const location = useLocation()
     const successMessage = location.state?.message || null
+    console.log('Location state:', location.state)  // ← yeh add karo
 
     const handleGoogleLogin = async (credentialResponse) => {
         try {
@@ -79,7 +80,11 @@ function LoginPage() {
 
                 {/* Success message — OTP verify ke baad */}
                 {successMessage && (
-                    <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm">
+                    <div className={`px-4 py-3 rounded-lg mb-4 text-sm border ${location.state?.type === 'warning'
+                        ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
+                        : 'bg-green-50 border-green-200 text-green-600'
+                        }`}>
+                        {location.state?.type === 'warning' ? '⚠️ ' : '✅ '}
                         {successMessage}
                     </div>
                 )}
